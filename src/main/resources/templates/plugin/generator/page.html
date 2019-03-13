@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>代码生成器</title>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="${ctxPath}/assets/libs/layui/css/layui.css"/>
+    <link rel="stylesheet" href="${ctxPath}/assets/module/admin.css" media="all"/>
+    <style>
+        .layui-collapse{margin-top: 12px;}
+        div[lay-id=gen-table] .layui-table-header .layui-table tr .layui-form-checkbox{display: none;}
+    </style>
+</head>
+
+<body>
+
+<!-- 加载动画，移除位置在common.js中 -->
+<div class="page-loading">
+    <div class="rubik-loader"></div>
+</div>
+
+<!-- 关闭Tab时顶部标题 -->
+<div class="layui-body-header">
+    <span class="layui-body-header-title">代码生成器</span>
+    <span class="layui-breadcrumb pull-right">
+        <a href="${ctxPath}/index">首页</a>
+        <a><cite>代码生成器</cite></a>
+    </span>
+</div>
+
+<!-- 正文开始 -->
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <form class="layui-form" action="javascript:;">
+                <div class="layui-form toolbar">
+                    <div class="layui-form-item">
+                        <div class="layui-inline">
+                            <label class="layui-form-label w-auto">名称：</label>
+                            <div class="layui-input-inline mr0">
+                                <input id="edtSearch" class="layui-input" type="text" placeholder="输入关键字"/>
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <button class="layui-btn icon-btn" id="btnSearch">
+                                <i class="layui-icon layui-icon-search"></i>搜索
+                            </button>
+                        </div>
+                        <div class="layui-inline">
+                            <button class="layui-btn icon-btn" id="btnGen" lay-submit lay-filter="update-submit">
+                                <i class="layui-icon layui-icon-code-circle"></i>生成代码
+                            </button>
+                        </div>
+                        <div class="layui-inline">
+                            <button class="layui-btn icon-btn" ew-href="${ctxPath}/generator/createTable">
+                                <i class="layui-icon layui-icon-add-circle"></i>创建表
+                            </button>
+                        </div>
+                        <div class="layui-inline">
+                            <button class="layui-btn icon-btn" id="btnInfo">
+                                <i class="layui-icon layui-icon-about"></i>注意事项
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="layui-collapse">
+                    <div class="layui-colla-item">
+                        <h2 class="layui-colla-title">配置项</h2>
+                        <div class="layui-colla-content">
+
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">表:</label>
+                                <div class="layui-input-block">
+                                    <input type="text" placeholder="英文逗号隔开" class="layui-input" name="tableName"
+                                           lay-verify="tableName"/>
+                                </div>
+                            </div>
+
+                            <div class=" layui-form-item">
+                                <label class="layui-form-label">表名前缀:</label>
+                                <div class="layui-input-block">
+                                    <input type="text" placeholder="英文逗号隔开" class="layui-input" name="tablePrefix"
+                                           value="sys_,xx_"
+                                           lay-verType="tips" lay-verify="required" required/>
+                                </div>
+                            </div>
+
+                            <div class="layui-form-item layui-row">
+                                <div class="layui-col-xs6 layui-col-sm6 layui-col-md6">
+                                    <label class="layui-form-label">项目名:</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="projectName" placeholder="用于：com.项目名.controller" value="wf.ew.system"
+                                               class="layui-input" ay-verType="tips" lay-verify="required" required>
+                                    </div>
+                                </div>
+                                <div class="layui-col-xs6 layui-col-sm6 layui-col-md6">
+                                    <label class="layui-form-label">覆盖原文件:</label>
+                                    <div class="layui-input-block">
+                                        <input type="checkbox" name="override" lay-skin="switch" lay-text="是|否">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class=" layui-form-item">
+                                <label class="layui-form-label">生成文件:</label>
+                                <div class="layui-input-block">
+                                    <input type="checkbox" name="files" value="controller" title="Controller.java" checked>
+                                    <input type="checkbox" name="files" value="service" title="Service/Impl.java" checked>
+                                    <input type="checkbox" name="files" value="dao" title="Dao.java" checked>
+                                    <input type="checkbox" name="files" value="xml" title="Xml.xml" checked>
+                                    <input type="checkbox" name="files" value="entity" title="Entity.java" checked>
+                                    <input type="checkbox" name="files" value="list" title="list.html" checked>
+                                    <input type="checkbox" name="files" value="menu" title="创建菜单" checked>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <table class="layui-table" id="gen-table" lay-filter="gen-table"></table>
+
+        </div>
+    </div>
+
+</div>
+
+<div id="info-modal" style="display: none;">
+    <div class="layui-col-space28" style="padding: 22px;">
+        <ul class="layui-timeline">
+            <li class="layui-timeline-item">
+                <i class="layui-icon layui-timeline-axis">&#xe63f;</i>
+                <div class="layui-timeline-content layui-text">
+                    <h3 class="layui-timeline-title">命名</h3>
+                    <p>
+                        表名采用下划线命名法，即a_b_c，生成代码时会自动转换为驼峰命名法
+                    </p>
+                </div>
+            </li>
+            <li class="layui-timeline-item">
+                <i class="layui-icon layui-timeline-axis">&#xe63f;</i>
+                <div class="layui-timeline-content layui-text">
+                    <h3 class="layui-timeline-title">生成代码</h3>
+                    <p>
+                        生成代码包括controller、service、serviceImpl、dao、bean、html等，但不包含xml
+                    </p>
+                    <p>
+                        Controller将自动继承BaseCrudController，继承后将不再需要编写通用增删改查代码，如果有特殊需求，应重写原方法
+                    </p>
+                </div>
+            </li>
+            <li class="layui-timeline-item">
+                <i class="layui-icon layui-timeline-axis">&#xe63f;</i>
+                <div class="layui-timeline-content layui-text">
+                    <h3 class="layui-timeline-title">其他</h3>
+                    <p>
+                        确保每个字段的注释完整，否则自动生成的页面数据不全
+                    </p>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- js部分 -->
+<script type="text/javascript" src="${ctxPath}/assets/libs/layui/layui.js"></script>
+<script type="text/javascript" src="${ctxPath}/assets/js/common.js"></script>
+
+<script>
+    layui.use(['layer', 'form', 'table', 'admin', 'notice', 'element'], function () {
+        var $ = layui.jquery;
+        var layer = layui.layer;
+        var element = layui.element;
+        var form = layui.form;
+        var table = layui.table;
+        var admin = layui.admin;
+        var notice = layui.notice;
+
+        // 渲染表格
+        var ins = table.render({
+            elem: '#gen-table',
+            url: '${ctxPath}/generator/query/table',
+            method: 'post',
+            page: true,
+            autoSort: false,
+            cellMinWidth: 100,
+            cols: [[
+                {type: 'checkbox'},
+                {field: 'tableName', align: 'center', title: 'Name'},
+                {field: 'engine', align: 'center', title: 'Engine'},
+                {field: 'tableComment', align: 'center', title: 'Comment'},
+            ]],
+            done: function (res, curr, count) {
+                var $name = $('input[name=tableName]');
+                var checkedValues = $name.val();
+                var checkedArr = checkedValues === '' ? [] : checkedValues.split(',');
+                for (var i = 0; i < checkedArr.length; i++) {
+                    var item = checkedArr[i];
+                    for (var j = 0; j < res.data.length; j++) {
+                        var d = res.data[j];
+                        if (d.tableName === item) {
+                            $('div[lay-id=gen-table] .layui-table-body .layui-table tr[data-index='+ j +'] td.layui-table-col-special .layui-form-checkbox>i.layui-icon').trigger('click');
+                        }
+                    }
+                }
+
+                $('div[lay-id=gen-table] .layui-table-body .layui-table tr[data-index]').on('click', function(e) {
+                    // 判断是否点击单选按钮，防止事件冒泡
+                    if (e.target.localName !== 'i') {
+                        $(this).find('td.layui-table-col-special .layui-form-checkbox>i.layui-icon').trigger('click');
+                    }
+                });
+            }
+        });
+
+        table.on('checkbox(gen-table)', function(obj){
+            var $name = $('input[name=tableName]');
+            var checkedValues = $name.val();
+            var checkedArr = checkedValues === '' ? [] : checkedValues.split(',');
+            var tableName = obj.data.tableName;
+
+            var flag = false;
+            for (var i = 0; i < checkedArr.length; i++) {
+                var item = checkedArr[i];
+                if (item === tableName) {
+                    flag = true;
+                    if (!obj.checked) {
+                        checkedArr.splice(i, 1);
+                    }
+                }
+            }
+            if (!flag) {
+                checkedArr.push(tableName);
+            }
+            $name.val(checkedArr.join(','));
+        });
+
+        form.on('submit(update-submit)', function(data){
+            var arr = [];
+            $('input[name=files]').each(function (i, item) {
+                if ($(item).prop('checked')) {
+                    arr.push($(item).val());
+                }
+            });
+            data.field.files = arr.join(',');
+            console.log(data.field);
+            admin.req('${ctxPath}/generator/create', data.field, function (res) {
+                //admin.message(res);
+            }, 'post');
+            return false;
+        });
+
+        form.verify({
+            tableName: function (value, item) {
+                if (value === '') {
+                    return '请选择表';
+                }
+            }
+        });
+
+        // 搜索按钮点击事件
+        $('#btnSearch').click(function () {
+            table.reload('gen-table', {
+                where: {
+                    param: $('#edtSearch').val(),
+                    disabled: $('#disabled').val()
+                }
+            });
+        });
+
+        $('#btnInfo').click(function () {
+            admin.open({
+                type: 1,
+                title: '注意事项',
+                shade: 0,
+                content: $('#info-modal')
+            });
+        });
+        
+        $('.nav-btn dd').click(function () {
+            var type = $(this).attr('data-type');
+            action[type]();
+        });
+
+        var action = {
+            checkIds: function () {
+                var checkRows = table.checkStatus('gen-table');
+                console.log(checkRows);
+                if (checkRows.data.length != 0) {
+                    var ids = [];
+                    layui.each(checkRows.data, function (i, item) {
+                        ids.push(item.tableName);
+                    });
+                    return ids;
+                }
+                return null;
+            },
+            dialog: function (data, disabled) {
+                for (var key in data) {
+                    var o = $('#detail-form *[name='+ key +']');
+                    o.val(data[key]);
+                    if (disabled && o.attr('readonly') == undefined) {
+                        o.attr('disabled', 'disabled');
+                    }
+                }
+
+                if (disabled) {
+                    $('#detail-form .btns').hide();
+                } else {
+                    $('#detail-form *[name]').removeAttr('disabled');
+                    $('#detail-form .btns').show();
+                }
+
+                admin.open({
+                    type: 1,
+                    title: data.name,
+                    shade: 0,
+                    area: ['890px', '430px'],
+                    content: $('#detail-modal')
+                });
+            }
+        };
+
+    });
+</script>
+</body>
+
+</html>

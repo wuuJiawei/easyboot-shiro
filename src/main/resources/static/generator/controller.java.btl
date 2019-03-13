@@ -1,0 +1,72 @@
+package ${package.Controller};
+
+import cn.hutool.log.Log;
+import cn.hutool.log.LogFactory;
+import ${package.Entity}.${entity};
+import ${package.Service}.${table.serviceName};
+import com.wf.ew.plugin.log.annotation.LogSubject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+
+<% if(restControllerStyle){ %>
+import org.springframework.web.bind.annotation.RestController;
+<% }else{ %>
+import org.springframework.stereotype.Controller;
+<% } %>
+<% if(isNotEmpty(superControllerClassPackage)){ %>
+import ${superControllerClassPackage};
+<% } %>
+
+/**
+ * <p>
+ * ${table.comment!} 前端控制器
+ * </p>
+ *
+ * @author ${author}
+ * @since ${date}
+ */
+
+@Controller
+@RequestMapping("${table.entityPath}")
+@LogSubject("${table.comment!}")
+<% if(isNotEmpty(superControllerClass)){ %>
+public class ${table.controllerName} extends ${superControllerClass}<${entity}, ${table.serviceName}>  {
+<% } else { %>
+public class ${table.controllerName} {
+<% } %>
+
+    @Autowired
+    private ${table.serviceName} service;
+
+    @Override
+    protected ${table.serviceName} getService() {
+        return service;
+    }
+
+    @Override
+    protected Log getLog() {
+        return LogFactory.get();
+    }
+
+    @Override
+    protected String getParamField() {
+        return null;
+    }
+
+    @Override
+    protected String getOrderField() {
+        <% for(field in table.fields){ %>
+            <% if(field.keyFlag){ %>
+        return "${field.name}";
+        <% }
+        } %>
+    }
+
+    @GetMapping("/")
+    public String list(){
+        return "${table.entityPath}/list.html";
+    }
+
+}
+
