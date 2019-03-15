@@ -45,6 +45,10 @@ public class MainController extends BaseController implements ErrorController {
         List<Map<String, Object>> menuTree = getMenuTree(authorities, -1);
         model.addAttribute("menus", menuTree);
         model.addAttribute("loginUser", getLoginUser());
+
+        // basePath
+        request.setAttribute("basePath", basePath());
+
         return "index.html";
     }
 

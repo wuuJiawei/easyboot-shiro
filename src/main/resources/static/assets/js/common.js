@@ -10,7 +10,8 @@ layui.config({
     dtree: 'dtree/dtree',
     citypicker: 'city-picker/city-picker',
     tableSelect: 'tableSelect/tableSelect',
-    iconPicker: 'iconPicker/iconPicker'
+    iconPicker: 'iconPicker/iconPicker',
+    socket: 'socket'
 }).use(['layer', 'admin', 'element'], function () {
     var $ = layui.jquery;
     var layer = layui.layer;
@@ -61,7 +62,7 @@ var common = {
         } else {
             top.notice.warning(o);
         }
-    },
+    }
 };
 
 // 字符串处理
@@ -76,3 +77,4 @@ var strUtil = {
         return false;
     }
 };
+

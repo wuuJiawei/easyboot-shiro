@@ -9,6 +9,9 @@
     <title>EasyBoot</title>
     <link rel="stylesheet" href="${ctxPath}/assets/libs/layui/css/layui.css"/>
     <link rel="stylesheet" href="${ctxPath}/assets/module/admin.css"/>
+    <style>
+        #message-dot{display: none;}
+    </style>
 </head>
 
 <body class="layui-layout-body">
@@ -50,11 +53,12 @@
 <script type="text/javascript" src="${ctxPath}/assets/libs/layui/layui.js"></script>
 <script type="text/javascript" src="${ctxPath}/assets/js/common.js"></script>
 <script>
-    layui.use(['layer', 'element', 'index', 'notice'], function () {
+    layui.use(['layer', 'element', 'index', 'notice', 'socket'], function () {
         var $ = layui.jquery;
         var layer = layui.layer;
         var index = layui.index;
         notice = layui.notice;
+        var socket = layui.socket;
 
         index.loadSetting();  // 加载本地缓存的设置属性
         // 默认加载主页
@@ -63,8 +67,33 @@
             menuName: '<i class="layui-icon layui-icon-home"></i>'
         });
 
+        // 开启socket服务
+        var socketIns = socket.init({
+            url: '${basePath}/ws',
+            user: '${loginUser.userId}',
+            onOpen: function () {
+                console.log("WebSocket已打开");
+            },
+            onMessage: function (msg) {
+                console.log(msg);
+                notice.success({
+                    title: '消息通知',
+                    message: msg.content
+                });
+                $('#message-dot').show();
+            }
+        });
+
+        socketIns.send([{
+            toUser: 2,
+            fromUser: 1,
+            content: '测试发送',
+            type: 'single'
+        }]);
+
     });
 </script>
+
 </body>
 
 </html>
